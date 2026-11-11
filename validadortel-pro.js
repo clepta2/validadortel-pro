@@ -4,6 +4,7 @@
  */
 
 import { WORLD_COUNTRIES, OPERADORAS_PREFIXOS_INTERNACIONAIS } from './data/countries.js';
+import { FUSOS_DDD_BRASIL, TIMEZONES_PAISES, calcularFusoEHorario } from './data/timezones.js';
 
 export const DDD_MAP = {
   // Centro-Oeste
@@ -219,6 +220,7 @@ export class ValidadorTelPro {
     const e164 = `+55${nat}`;
     const e164Limpo = `55${nat}`;
     const operadora = this.deduzirOperadora(ddd, numeroCorpo, isCelular);
+    const fusoInfo = calcularFusoEHorario(FUSOS_DDD_BRASIL[ddd] || 'America/Sao_Paulo');
 
     return {
       valido: true,
@@ -228,6 +230,8 @@ export class ValidadorTelPro {
       possuiWhatsapp: isCelular,
       operadora: operadora.nome,
       detalhesOperadora: operadora,
+      fusoHorario: fusoInfo,
+      scoreQualidade: isCelular ? 100 : 90,
       comunicacao: {
         aceitaSms: isCelular,
         podeTerWhatsapp: true,
@@ -289,6 +293,7 @@ export class ValidadorTelPro {
 
           const e164 = `+${c.ddi}${nat}`;
           const e164Limpo = `${c.ddi}${nat}`;
+          const fusoInfo = calcularFusoEHorario(TIMEZONES_PAISES[c.code] || 'UTC');
 
           return {
             valido: true,
@@ -302,6 +307,8 @@ export class ValidadorTelPro {
               tipo: isCelular ? 'Mobile Network Operator (MNO)' : 'Fixed Line Operator',
               principaisOperadorasPais: c.operadoras || []
             },
+            fusoHorario: fusoInfo,
+            scoreQualidade: isCelular ? 95 : 85,
             comunicacao: {
               aceitaSms: isCelular,
               podeTerWhatsapp: true,
