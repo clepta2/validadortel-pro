@@ -394,6 +394,25 @@ export class ValidadorTelPro {
       motivo: `Quantidade de dígitos inválida: esperado entre 10 e 13 dígitos para o Brasil, ou 8 a 15 dígitos internacional. Recebido: ${limpo.length}`
     };
   }
+
+  /**
+   * Consulta a API Cloudflare Edge Oficial da Ponte
+   * @param {string} telefone
+   * @param {Object} [options]
+   * @returns {Promise<Object>}
+   */
+  async validarRemoto(telefone, options = {}) {
+    const raw = String(telefone || '').trim();
+    const endpoint = (options.endpoint || this.endpoint || 'https://ponte.ozpro.com.br').replace(/\/$/, '');
+    const apiKey = options.apiKey || this.apiKey || '';
+    const url = `${endpoint}/api/validar-telefone?telefone=${encodeURIComponent(raw)}`;
+
+    const headers = { 'Accept': 'application/json' };
+    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+    const res = await fetch(url, { headers });
+    return await res.json();
+  }
 }
 
 export default ValidadorTelPro;

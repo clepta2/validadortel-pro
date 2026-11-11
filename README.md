@@ -1,7 +1,7 @@
-# 📞 ValidadorTel Pro
+﻿# 📞 ValidadorTel Pro
 
 > **Documentação Oficial da API & SDK de Integração Telefônica (ANATEL & ITU E.164).**  
-> 🔒 **Atenção:** Este repositório destina-se exclusivamente à visualização de documentação técnica e integração do cliente SDK. O serviço de API em nuvem é operado através do nosso **Site de APIs (em breve)**. O acesso aos endpoints na borda requer obrigatoriamente uma **Chave de API (`x-api-key`)** ativa.
+> 🔒 **Atenção:** Este repositório destina-se exclusivamente à visualização de documentação técnica e integração do cliente SDK. O serviço de API em nuvem é operado através do nosso **[Ponte APIs Marketplace](https://ponte.ozpro.com.br)**. O acesso aos endpoints na borda requer obrigatoriamente uma **Chave de API (`x-api-key`)** ativa.
 
 [![Status](https://img.shields.io/badge/Status-Cloudflare%20Edge%20API-success.svg)](#)
 [![Padrão](https://img.shields.io/badge/Padrão-ANATEL%20%26%20ITU%20E.164-blue.svg)](#)
@@ -12,13 +12,13 @@
 
 ## 🔒 Acesso à API e Chaves
 
-Para consumir esta API nos seus sistemas, cadastre-se no nosso **Site de APIs** para obter sua chave de acesso (`x-api-key`).
+Para consumir esta API nos seus sistemas, cadastre-se no nosso **[Ponte APIs Marketplace](https://ponte.ozpro.com.br)** para obter sua chave de acesso (`x-api-key`).
 
 Todas as requisições aos endpoints em nuvem devem incluir a chave no cabeçalho:
 ```http
 GET /api/validar-telefone?telefone=11996541234 HTTP/1.1
-Host: validadortel-pro-api.diffstoregja2.workers.dev
-x-api-key: SUA_CHAVE_DO_PORTAL
+Host: validadortel-pro-api.ponte.ozpro.com.br
+x-api-key: ponte_live_SUA_CHAVE_DO_PORTAL
 ```
 
 ---
@@ -69,18 +69,18 @@ console.log(resInternacional.whatsappLink);    // "https://wa.me/351912345678"
 
 ## 🌐 Endpoint Anycast Edge (Requer x-api-key)
 
-* **Endpoint Cloudflare:** `GET https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-telefone?telefone=...`
-* **Cluster:** Cloudflare Anycast (`diffstoregja2.workers.dev`)
+* **Endpoint Cloudflare:** `GET https://ponte.ozpro.com.br/api/validar-telefone?telefone=...`
+* **Cluster:** Cloudflare Anycast (`ponte.ozpro.com.br`)
 * **Autenticação:** Header `x-api-key` ou `Authorization: Bearer <key>`
 * **Latência:** `<5ms`
 
 ### Exemplo via cURL:
 ```bash
-curl -X GET "https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-telefone?telefone=11987654321" \
-  -H "x-api-key: SUA_CHAVE_DO_PORTAL"
+curl -X GET "https://ponte.ozpro.com.br/api/validar-telefone?telefone=11987654321" \
+  -H "x-api-key: ponte_live_SUA_CHAVE_DO_PORTAL"
 ```
 ```bash
-curl -X GET "https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-telefone?telefone=11987654321"
+curl -X GET "https://ponte.ozpro.com.br/api/validar-telefone?telefone=11987654321"
 ```
 
 ### Exemplo de Resposta JSON:
@@ -109,7 +109,7 @@ curl -X GET "https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-
   "e164Limpo": "5511987654321",
   "whatsappLink": "https://wa.me/5511987654321",
   "orgaoRegulador": "ANATEL (Agência Nacional de Telecomunicações)",
-  "edge": "diffstoregja2.workers.dev"
+  "edge": "ponte.ozpro.com.br"
 }
 ```
 
