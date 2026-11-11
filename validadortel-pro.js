@@ -3,6 +3,8 @@
  * SDK Oficial e Algoritmo Universal de Validação, Sanitização e Normalização Telefônica (ANATEL & ITU E.164)
  */
 
+import { WORLD_COUNTRIES, OPERADORAS_PREFIXOS_INTERNACIONAIS } from './data/countries.js';
+
 export const DDD_MAP = {
   // Centro-Oeste
   '61': { uf: 'DF', estado: 'Distrito Federal', regiao: 'Centro-Oeste' },
@@ -78,25 +80,7 @@ export const DDD_MAP = {
   '55': { uf: 'RS', estado: 'Rio Grande do Sul (Santa Maria / Uruguaiana)', regiao: 'Sul' }
 };
 
-export const DDI_CATALOG = [
-  { ddi: '55', code: 'BR', nome: 'Brasil', flag: '🇧🇷', min: 10, max: 11 },
-  { ddi: '1', code: 'US', nome: 'Estados Unidos / Canadá', flag: '🇺🇸', min: 10, max: 10 },
-  { ddi: '351', code: 'PT', nome: 'Portugal', flag: '🇵🇹', min: 9, max: 9 },
-  { ddi: '34', code: 'ES', nome: 'Espanha', flag: '🇪🇸', min: 9, max: 9 },
-  { ddi: '44', code: 'GB', nome: 'Reino Unido', flag: '🇬🇧', min: 10, max: 10 },
-  { ddi: '33', code: 'FR', nome: 'França', flag: '🇫🇷', min: 9, max: 9 },
-  { ddi: '49', code: 'DE', nome: 'Alemanha', flag: '🇩🇪', min: 10, max: 11 },
-  { ddi: '39', code: 'IT', nome: 'Itália', flag: '🇮🇹', min: 9, max: 10 },
-  { ddi: '54', code: 'AR', nome: 'Argentina', flag: '🇦🇷', min: 10, max: 11 },
-  { ddi: '595', code: 'PY', nome: 'Paraguai', flag: '🇵🇾', min: 9, max: 9 },
-  { ddi: '598', code: 'UY', nome: 'Uruguai', flag: '🇺🇾', min: 8, max: 9 },
-  { ddi: '56', code: 'CL', nome: 'Chile', flag: '🇨🇱', min: 9, max: 9 },
-  { ddi: '57', code: 'CO', nome: 'Colômbia', flag: '🇨🇴', min: 10, max: 10 },
-  { ddi: '52', code: 'MX', nome: 'México', flag: '🇲🇽', min: 10, max: 11 },
-  { ddi: '81', code: 'JP', nome: 'Japão', flag: '🇯🇵', min: 10, max: 10 },
-  { ddi: '86', code: 'CN', nome: 'China', flag: '🇨🇳', min: 11, max: 11 },
-  { ddi: '91', code: 'IN', nome: 'Índia', flag: '🇮🇳', min: 10, max: 10 }
-];
+export const DDI_CATALOG = WORLD_COUNTRIES;
 
 export class ValidadorTelPro {
   static detectarFake(limpo) {
@@ -266,30 +250,78 @@ export class ValidadorTelPro {
   }
 
   static validarInternacional(limpo) {
-    // Tenta casar DDI
-    for (const c of DDI_CATALOG) {
+    // Ordena do maior DDI para o menor para garantir correspondência exata
+    const sortedCountries = [...WORLD_COUNTRIES].sort((a, b) => b.ddi.length - a.ddi.length);
+
+    for (const c of sortedCountries) {
       if (limpo.startsWith(c.ddi)) {
-        const nat = limpo.slice(c.ddi.length);
+        let nat = limpo.slice(c.ddi.length);
+
+        // Se o usuário digitou o prefixo de discagem local (trunk prefix, ex: '0' na Europa ou '1' no México), normaliza
+        if (c.trunkPrefix && nat.startsWith(c.trunkPrefix) && nat.length > c.max) {
+          nat = nat.slice(c.trunkPrefix.length);
+        }
+
         if (nat.length >= c.min && nat.length <= c.max) {
           const fake = this.detectarFake(nat);
           if (fake.fake) return { valido: false, motivo: fake.motivo };
+
+          // Determina se é celular baseado no padrão do país
+          let isCelular = true;
+          if (c.mobilePattern) {
+            try {
+              const reg = new RegExp(c.mobilePattern);
+              isCelular = reg.test(nat);
+            } catch (_) {}
+          }
+
+          // Identifica operadora internacional por prefixo ou catálogo de líderes
+          let operadoraNome = c.operadoras && c.operadoras.length > 0 ? c.operadoras[0] : 'Operadora Local Internacional';
+          const prefixRules = OPERADORAS_PREFIXOS_INTERNACIONAIS[c.ddi];
+          if (prefixRules) {
+            for (const r of prefixRules) {
+              if (r.prefix.test(nat)) {
+                operadoraNome = r.operadora;
+                break;
+              }
+            }
+          }
 
           const e164 = `+${c.ddi}${nat}`;
           const e164Limpo = `${c.ddi}${nat}`;
 
           return {
             valido: true,
-            tipo: 'Internacional',
-            ehCelular: true,
-            ehFixo: false,
-            possuiWhatsapp: true,
-            pais: { codigo: c.code, nome: c.nome, ddi: c.ddi, flag: c.flag },
+            tipo: isCelular ? 'Móvel / Celular Internacional' : 'Fixo Internacional',
+            ehCelular: isCelular,
+            ehFixo: !isCelular,
+            possuiWhatsapp: isCelular,
+            operadora: operadoraNome,
+            detalhesOperadora: {
+              nome: operadoraNome,
+              tipo: isCelular ? 'Mobile Network Operator (MNO)' : 'Fixed Line Operator',
+              principaisOperadorasPais: c.operadoras || []
+            },
+            comunicacao: {
+              aceitaSms: isCelular,
+              podeTerWhatsapp: true,
+              tipoWhatsappProvavel: isCelular ? 'pessoal_ou_business' : 'apenas_whatsapp_business',
+              whatsappLink: isCelular ? `https://wa.me/${e164Limpo}` : null
+            },
+            pais: {
+              codigo: c.code,
+              iso3: c.iso3,
+              nome: c.nome,
+              nameEn: c.nameEn,
+              ddi: c.ddi,
+              flag: c.flag
+            },
             numeroNacional: nat,
             numeroFormatado: `+${c.ddi} ${nat}`,
             e164,
             e164Limpo,
-            whatsappLink: `https://wa.me/${e164Limpo}`,
-            orgaoRegulador: 'ITU-T E.164'
+            whatsappLink: isCelular ? `https://wa.me/${e164Limpo}` : null,
+            orgaoRegulador: `ITU-T E.164 (${c.nome})`
           };
         }
       }
@@ -297,7 +329,7 @@ export class ValidadorTelPro {
 
     return {
       valido: false,
-      motivo: 'Número internacional não reconhecido ou comprimento incompatível com o DDI'
+      motivo: 'Número internacional não reconhecido ou comprimento incompatível com o DDI do país'
     };
   }
 
@@ -323,13 +355,24 @@ export class ValidadorTelPro {
       return this.validarBrasil(limpo, true);
     }
 
-    // 3. Se tem 10 ou 11 dígitos -> Verifica se o DDD é brasileiro válido
+    // 3. Se tem 10 ou 11 dígitos -> Verifica se o DDD é brasileiro válido e segue o padrão nacional
     if (limpo.length === 10 || limpo.length === 11) {
       const ddd = limpo.slice(0, 2);
+      const isBrMobile = limpo.length === 11 && limpo.charAt(2) === '9';
+      const isBrFixed = limpo.length === 10 && ['2', '3', '4', '5'].includes(limpo.charAt(2));
+
+      if (DDD_MAP[ddd] && (isBrMobile || isBrFixed)) {
+        return this.validarBrasil(limpo, false);
+      }
+
+      // Se não segue o padrão estrito brasileiro (ex: França DDI 33 com 11 dígitos), tenta internacional primeiro
+      const intl = this.validarInternacional(limpo);
+      if (intl.valido) return intl;
+
       if (DDD_MAP[ddd]) {
         return this.validarBrasil(limpo, false);
       }
-      return this.validarInternacional(limpo);
+      return intl;
     }
 
     // 4. Outros países (DDI internacional de 8 a 15 dígitos)

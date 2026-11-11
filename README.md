@@ -42,10 +42,13 @@ const resFake = ValidadorTelPro.validar('11111111111');
 console.log(resFake.valido);             // false
 console.log(resFake.motivo);             // "Número forjado com repetição excessiva do mesmo dígito"
 
-// 4. Suporte a DDI Internacional (+1 EUA, +351 Portugal, etc.)
-const resInternacional = ValidadorTelPro.validar('+1 (415) 555-2671');
-console.log(resInternacional.pais.nome); // "Estados Unidos / Canadá"
-console.log(resInternacional.pais.flag); // "🇺🇸"
+// 4. Suporte a DDI Internacional (+1 EUA, +351 Portugal, +44 UK, +33 França, etc.)
+const resInternacional = ValidadorTelPro.validar('+351 912 345 678');
+console.log(resInternacional.pais.nome);        // "Portugal"
+console.log(resInternacional.pais.flag);        // "🇵🇹"
+console.log(resInternacional.operadora);        // "Vodafone Portugal"
+console.log(resInternacional.comunicacao.aceitaSms); // true
+console.log(resInternacional.whatsappLink);    // "https://wa.me/351912345678"
 ```
 
 ---
