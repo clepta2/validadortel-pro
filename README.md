@@ -4,6 +4,7 @@
 > 🔒 **Atenção:** Este repositório destina-se exclusivamente à visualização de documentação técnica e integração do cliente SDK. O serviço de API em nuvem é operado através do nosso **[Ponte APIs Marketplace](https://ponte.ozpro.com.br)**. O acesso aos endpoints na borda requer obrigatoriamente uma **Chave de API (`x-api-key`)** ativa.
 
 [![Status](https://img.shields.io/badge/Status-Cloudflare%20Edge%20API-success.svg)](#)
+[![CI/CD Tests](https://github.com/clepta2/validadortel-pro/actions/workflows/test.yml/badge.svg)](https://github.com/clepta2/validadortel-pro/actions)
 [![Padrão](https://img.shields.io/badge/Padrão-ANATEL%20%26%20ITU%20E.164-blue.svg)](#)
 [![Autenticação](https://img.shields.io/badge/Autenticação-x--api--key%20Obrigatória-orange.svg)](#)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietária%20%2F%20Portal%20de%20APIs-red.svg)](LICENSE)
