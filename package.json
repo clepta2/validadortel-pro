@@ -1,0 +1,38 @@
+{
+  "name": "validadortel-pro",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SDK e API Oficial de Validação de Telefones e Celulares: Detecção ANATEL (9º dígito, celular vs fixo, 67 DDDs e Estados), ITU E.164 Internacional (230+ países com bandeira), detecção de números falsos/repetidos e gerador de link WhatsApp na borda (<5ms).",
+  "main": "validadortel-pro.js",
+  "module": "validadortel-pro.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "test": "node test.js",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [
+    "telefone",
+    "phone-validator",
+    "validador-telefone",
+    "anatel",
+    "celular",
+    "e164",
+    "whatsapp",
+    "whatsapp-link",
+    "ddd-brasil",
+    "cloudflare-worker",
+    "edge-computing",
+    "brasil",
+    "sdk"
+  ],
+  "author": "clepta2 <clepta2@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clepta2/validadortel-pro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/clepta2/validadortel-pro/issues"
+  },
+  "homepage": "https://github.com/clepta2/validadortel-pro#readme"
+}

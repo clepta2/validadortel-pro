@@ -1,0 +1,10 @@
+name = "validadortel-pro-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+SERVICE_NAME = "ValidadorTel Pro API"
+ENVIRONMENT = "production"
+GITHUB_REPO = "clepta2/validadortel-pro"
+DOCS_URL = "https://ponte.ozpro.com.br"

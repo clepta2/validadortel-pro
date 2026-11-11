@@ -1,0 +1,292 @@
+/**
+ * validadortel-pro.js
+ * SDK Oficial e Algoritmo Universal de Validação, Sanitização e Normalização Telefônica (ANATEL & ITU E.164)
+ */
+
+export const DDD_MAP = {
+  // Centro-Oeste
+  '61': { uf: 'DF', estado: 'Distrito Federal', regiao: 'Centro-Oeste' },
+  '62': { uf: 'GO', estado: 'Goiás', regiao: 'Centro-Oeste' },
+  '64': { uf: 'GO', estado: 'Goiás', regiao: 'Centro-Oeste' },
+  '65': { uf: 'MT', estado: 'Mato Grosso', regiao: 'Centro-Oeste' },
+  '66': { uf: 'MT', estado: 'Mato Grosso', regiao: 'Centro-Oeste' },
+  '67': { uf: 'MS', estado: 'Mato Grosso do Sul', regiao: 'Centro-Oeste' },
+  // Nordeste
+  '71': { uf: 'BA', estado: 'Bahia', regiao: 'Nordeste' },
+  '73': { uf: 'BA', estado: 'Bahia', regiao: 'Nordeste' },
+  '74': { uf: 'BA', estado: 'Bahia', regiao: 'Nordeste' },
+  '75': { uf: 'BA', estado: 'Bahia', regiao: 'Nordeste' },
+  '77': { uf: 'BA', estado: 'Bahia', regiao: 'Nordeste' },
+  '79': { uf: 'SE', estado: 'Sergipe', regiao: 'Nordeste' },
+  '81': { uf: 'PE', estado: 'Pernambuco', regiao: 'Nordeste' },
+  '87': { uf: 'PE', estado: 'Pernambuco', regiao: 'Nordeste' },
+  '82': { uf: 'AL', estado: 'Alagoas', regiao: 'Nordeste' },
+  '83': { uf: 'PB', estado: 'Paraíba', regiao: 'Nordeste' },
+  '84': { uf: 'RN', estado: 'Rio Grande do Norte', regiao: 'Nordeste' },
+  '85': { uf: 'CE', estado: 'Ceará', regiao: 'Nordeste' },
+  '88': { uf: 'CE', estado: 'Ceará', regiao: 'Nordeste' },
+  '86': { uf: 'PI', estado: 'Piauí', regiao: 'Nordeste' },
+  '89': { uf: 'PI', estado: 'Piauí', regiao: 'Nordeste' },
+  '98': { uf: 'MA', estado: 'Maranhão', regiao: 'Nordeste' },
+  '99': { uf: 'MA', estado: 'Maranhão', regiao: 'Nordeste' },
+  // Norte
+  '68': { uf: 'AC', estado: 'Acre', regiao: 'Norte' },
+  '69': { uf: 'RO', estado: 'Rondônia', regiao: 'Norte' },
+  '91': { uf: 'PA', estado: 'Pará', regiao: 'Norte' },
+  '93': { uf: 'PA', estado: 'Pará', regiao: 'Norte' },
+  '94': { uf: 'PA', estado: 'Pará', regiao: 'Norte' },
+  '92': { uf: 'AM', estado: 'Amazonas', regiao: 'Norte' },
+  '97': { uf: 'AM', estado: 'Amazonas', regiao: 'Norte' },
+  '95': { uf: 'RR', estado: 'Roraima', regiao: 'Norte' },
+  '96': { uf: 'AP', estado: 'Amapá', regiao: 'Norte' },
+  '63': { uf: 'TO', estado: 'Tocantins', regiao: 'Norte' },
+  // Sudeste
+  '11': { uf: 'SP', estado: 'São Paulo (Região Metropolitana)', regiao: 'Sudeste' },
+  '12': { uf: 'SP', estado: 'São Paulo (Vale do Paraíba / Litoral Norte)', regiao: 'Sudeste' },
+  '13': { uf: 'SP', estado: 'São Paulo (Baixada Santista / Litoral Sul)', regiao: 'Sudeste' },
+  '14': { uf: 'SP', estado: 'São Paulo (Bauru / Marília)', regiao: 'Sudeste' },
+  '15': { uf: 'SP', estado: 'São Paulo (Sorocaba / Itapeva)', regiao: 'Sudeste' },
+  '16': { uf: 'SP', estado: 'São Paulo (Ribeirão Preto / Franca)', regiao: 'Sudeste' },
+  '17': { uf: 'SP', estado: 'São Paulo (São José do Rio Preto)', regiao: 'Sudeste' },
+  '18': { uf: 'SP', estado: 'São Paulo (Presidente Prudente / Araçatuba)', regiao: 'Sudeste' },
+  '19': { uf: 'SP', estado: 'São Paulo (Campinas / Piracicaba)', regiao: 'Sudeste' },
+  '21': { uf: 'RJ', estado: 'Rio de Janeiro (Região Metropolitana)', regiao: 'Sudeste' },
+  '22': { uf: 'RJ', estado: 'Rio de Janeiro (Campos / Macaé / Cabo Frio)', regiao: 'Sudeste' },
+  '24': { uf: 'RJ', estado: 'Rio de Janeiro (Petrópolis / Volta Redonda)', regiao: 'Sudeste' },
+  '27': { uf: 'ES', estado: 'Espírito Santo (Vitória / Região Metropolitana)', regiao: 'Sudeste' },
+  '28': { uf: 'ES', estado: 'Espírito Santo (Cachoeiro de Itapemirim)', regiao: 'Sudeste' },
+  '31': { uf: 'MG', estado: 'Minas Gerais (Belo Horizonte)', regiao: 'Sudeste' },
+  '32': { uf: 'MG', estado: 'Minas Gerais (Juiz de Fora)', regiao: 'Sudeste' },
+  '33': { uf: 'MG', estado: 'Minas Gerais (Governador Valadares)', regiao: 'Sudeste' },
+  '34': { uf: 'MG', estado: 'Minas Gerais (Uberlândia)', regiao: 'Sudeste' },
+  '35': { uf: 'MG', estado: 'Minas Gerais (Poços de Caldas / Pouso Alegre)', regiao: 'Sudeste' },
+  '37': { uf: 'MG', estado: 'Minas Gerais (Divinópolis)', regiao: 'Sudeste' },
+  '38': { uf: 'MG', estado: 'Minas Gerais (Montes Claros)', regiao: 'Sudeste' },
+  // Sul
+  '41': { uf: 'PR', estado: 'Paraná (Curitiba / Litoral)', regiao: 'Sul' },
+  '42': { uf: 'PR', estado: 'Paraná (Ponta Grossa / Guarapuava)', regiao: 'Sul' },
+  '43': { uf: 'PR', estado: 'Paraná (Londrina / Apucarana)', regiao: 'Sul' },
+  '44': { uf: 'PR', estado: 'Paraná (Maringá / Campo Mourão)', regiao: 'Sul' },
+  '45': { uf: 'PR', estado: 'Paraná (Foz do Iguaçu / Cascavel)', regiao: 'Sul' },
+  '46': { uf: 'PR', estado: 'Paraná (Francisco Beltrão / Pato Branco)', regiao: 'Sul' },
+  '47': { uf: 'SC', estado: 'Santa Catarina (Joinville / Blumenau)', regiao: 'Sul' },
+  '48': { uf: 'SC', estado: 'Santa Catarina (Florianópolis / Criciúma)', regiao: 'Sul' },
+  '49': { uf: 'SC', estado: 'Santa Catarina (Chapecó / Lages)', regiao: 'Sul' },
+  '51': { uf: 'RS', estado: 'Rio Grande do Sul (Porto Alegre)', regiao: 'Sul' },
+  '53': { uf: 'RS', estado: 'Rio Grande do Sul (Pelotas / Rio Grande)', regiao: 'Sul' },
+  '54': { uf: 'RS', estado: 'Rio Grande do Sul (Caxias do Sul / Passo Fundo)', regiao: 'Sul' },
+  '55': { uf: 'RS', estado: 'Rio Grande do Sul (Santa Maria / Uruguaiana)', regiao: 'Sul' }
+};
+
+export const DDI_CATALOG = [
+  { ddi: '55', code: 'BR', nome: 'Brasil', flag: '🇧🇷', min: 10, max: 11 },
+  { ddi: '1', code: 'US', nome: 'Estados Unidos / Canadá', flag: '🇺🇸', min: 10, max: 10 },
+  { ddi: '351', code: 'PT', nome: 'Portugal', flag: '🇵🇹', min: 9, max: 9 },
+  { ddi: '34', code: 'ES', nome: 'Espanha', flag: '🇪🇸', min: 9, max: 9 },
+  { ddi: '44', code: 'GB', nome: 'Reino Unido', flag: '🇬🇧', min: 10, max: 10 },
+  { ddi: '33', code: 'FR', nome: 'França', flag: '🇫🇷', min: 9, max: 9 },
+  { ddi: '49', code: 'DE', nome: 'Alemanha', flag: '🇩🇪', min: 10, max: 11 },
+  { ddi: '39', code: 'IT', nome: 'Itália', flag: '🇮🇹', min: 9, max: 10 },
+  { ddi: '54', code: 'AR', nome: 'Argentina', flag: '🇦🇷', min: 10, max: 11 },
+  { ddi: '595', code: 'PY', nome: 'Paraguai', flag: '🇵🇾', min: 9, max: 9 },
+  { ddi: '598', code: 'UY', nome: 'Uruguai', flag: '🇺🇾', min: 8, max: 9 },
+  { ddi: '56', code: 'CL', nome: 'Chile', flag: '🇨🇱', min: 9, max: 9 },
+  { ddi: '57', code: 'CO', nome: 'Colômbia', flag: '🇨🇴', min: 10, max: 10 },
+  { ddi: '52', code: 'MX', nome: 'México', flag: '🇲🇽', min: 10, max: 11 },
+  { ddi: '81', code: 'JP', nome: 'Japão', flag: '🇯🇵', min: 10, max: 10 },
+  { ddi: '86', code: 'CN', nome: 'China', flag: '🇨🇳', min: 11, max: 11 },
+  { ddi: '91', code: 'IN', nome: 'Índia', flag: '🇮🇳', min: 10, max: 10 }
+];
+
+export class ValidadorTelPro {
+  static detectarFake(limpo) {
+    // 1. Dígitos todos repetidos (ex: 11111111111, 00000000000, 99999999999)
+    if (/^(\d)\1{7,}$/.test(limpo)) {
+      return { fake: true, motivo: 'Número forjado com repetição excessiva do mesmo dígito' };
+    }
+
+    // 2. Sequências completas óbvias de teste (123456789, 012345678)
+    if (/123456789|012345678/.test(limpo)) {
+      return { fake: true, motivo: 'Número contém sequência óbvia de teclado ou teste' };
+    }
+
+    // 3. Sufixo totalmente zerado (ex: 99000-0000, 0000-0000)
+    if (/000000$/.test(limpo)) {
+      return { fake: true, motivo: 'Número de teste com zeros finais consecutivos' };
+    }
+
+    return { fake: false, motivo: null };
+  }
+
+  static validarBrasil(limpo, comDdi = false) {
+    let nat = limpo;
+    if (comDdi && nat.startsWith('55')) {
+      nat = nat.slice(2);
+    }
+
+    if (nat.length !== 10 && nat.length !== 11) {
+      return {
+        valido: false,
+        motivo: `Quantidade de dígitos inválida para o Brasil: esperado 10 (fixo) ou 11 (celular). Recebido: ${nat.length}`
+      };
+    }
+
+    const ddd = nat.slice(0, 2);
+    const dddInfo = DDD_MAP[ddd];
+
+    if (!dddInfo) {
+      return {
+        valido: false,
+        motivo: `DDD '${ddd}' não existe na tabela oficial da ANATEL`
+      };
+    }
+
+    const fake = this.detectarFake(nat);
+    if (fake.fake) {
+      return {
+        valido: false,
+        motivo: fake.motivo
+      };
+    }
+
+    const isCelular = nat.length === 11;
+    const primeiroDigitoNumero = nat.charAt(2);
+
+    if (isCelular) {
+      // Regra oficial ANATEL: Celulares brasileiros DEVEM começar com 9
+      if (primeiroDigitoNumero !== '9') {
+        return {
+          valido: false,
+          motivo: `Celulares no Brasil devem conter 11 dígitos e iniciar com 9 após o DDD (recebido: ${primeiroDigitoNumero})`
+        };
+      }
+
+      // Segundo dígito do celular geralmente varia de 6 a 9 no Brasil
+      const segundoDigito = nat.charAt(3);
+      if (!['6', '7', '8', '9'].includes(segundoDigito)) {
+        return {
+          valido: false,
+          motivo: `Faixa de celular inválida: no Brasil os celulares iniciam com 96, 97, 98 ou 99 (recebido: 9${segundoDigito})`
+        };
+      }
+    } else {
+      // Telefone fixo (10 dígitos): primeiro dígito do número varia de 2 a 5
+      if (!['2', '3', '4', '5'].includes(primeiroDigitoNumero)) {
+        return {
+          valido: false,
+          motivo: `Telefones fixos no Brasil iniciam com dígitos de 2 a 5 após o DDD (recebido: ${primeiroDigitoNumero})`
+        };
+      }
+    }
+
+    const numeroCorpo = nat.slice(2);
+    const formatado = isCelular
+      ? `(${ddd}) ${numeroCorpo.slice(0, 5)}-${numeroCorpo.slice(5)}`
+      : `(${ddd}) ${numeroCorpo.slice(0, 4)}-${numeroCorpo.slice(4)}`;
+
+    const e164 = `+55${nat}`;
+    const e164Limpo = `55${nat}`;
+
+    return {
+      valido: true,
+      tipo: isCelular ? 'Móvel / Celular' : 'Fixo / Comercial',
+      ehCelular: isCelular,
+      ehFixo: !isCelular,
+      possuiWhatsapp: isCelular,
+      pais: { codigo: 'BR', nome: 'Brasil', ddi: '55', flag: '🇧🇷' },
+      ddd,
+      uf: dddInfo.uf,
+      estado: dddInfo.estado,
+      regiao: dddInfo.regiao,
+      numeroNacional: nat,
+      numeroFormatado: formatado,
+      internacionalFormatado: `+55 ${formatado}`,
+      e164,
+      e164Limpo,
+      whatsappLink: isCelular ? `https://wa.me/${e164Limpo}` : null,
+      orgaoRegulador: 'ANATEL (Agência Nacional de Telecomunicações)'
+    };
+  }
+
+  static validarInternacional(limpo) {
+    // Tenta casar DDI
+    for (const c of DDI_CATALOG) {
+      if (limpo.startsWith(c.ddi)) {
+        const nat = limpo.slice(c.ddi.length);
+        if (nat.length >= c.min && nat.length <= c.max) {
+          const fake = this.detectarFake(nat);
+          if (fake.fake) return { valido: false, motivo: fake.motivo };
+
+          const e164 = `+${c.ddi}${nat}`;
+          const e164Limpo = `${c.ddi}${nat}`;
+
+          return {
+            valido: true,
+            tipo: 'Internacional',
+            ehCelular: true,
+            ehFixo: false,
+            possuiWhatsapp: true,
+            pais: { codigo: c.code, nome: c.nome, ddi: c.ddi, flag: c.flag },
+            numeroNacional: nat,
+            numeroFormatado: `+${c.ddi} ${nat}`,
+            e164,
+            e164Limpo,
+            whatsappLink: `https://wa.me/${e164Limpo}`,
+            orgaoRegulador: 'ITU-T E.164'
+          };
+        }
+      }
+    }
+
+    return {
+      valido: false,
+      motivo: 'Número internacional não reconhecido ou comprimento incompatível com o DDI'
+    };
+  }
+
+  static validar(inputTelefone, options = {}) {
+    if (!inputTelefone || typeof inputTelefone !== 'string') {
+      return { valido: false, motivo: 'Telefone não informado' };
+    }
+
+    const raw = String(inputTelefone).trim();
+    const limpo = raw.replace(/\D/g, '');
+
+    if (!limpo) {
+      return { valido: false, informado: raw, motivo: 'Entrada não contém dígitos numéricos' };
+    }
+
+    // 1. Prefixo internacional explícito com '+' que não seja +55
+    if (raw.startsWith('+') && !raw.startsWith('+55')) {
+      return this.validarInternacional(limpo);
+    }
+
+    // 2. Se começa com 55 e tem 12 ou 13 dígitos -> Brasil com DDI
+    if (limpo.startsWith('55') && (limpo.length === 12 || limpo.length === 13)) {
+      return this.validarBrasil(limpo, true);
+    }
+
+    // 3. Se tem 10 ou 11 dígitos -> Verifica se o DDD é brasileiro válido
+    if (limpo.length === 10 || limpo.length === 11) {
+      const ddd = limpo.slice(0, 2);
+      if (DDD_MAP[ddd]) {
+        return this.validarBrasil(limpo, false);
+      }
+      return this.validarInternacional(limpo);
+    }
+
+    // 4. Outros países (DDI internacional de 8 a 15 dígitos)
+    if (limpo.length >= 8 && limpo.length <= 15) {
+      return this.validarInternacional(limpo);
+    }
+
+    return {
+      valido: false,
+      informado: raw,
+      tamanhoRecebido: limpo.length,
+      motivo: `Quantidade de dígitos inválida: esperado entre 10 e 13 dígitos para o Brasil, ou 8 a 15 dígitos internacional. Recebido: ${limpo.length}`
+    };
+  }
+}
+
+export default ValidadorTelPro;
