@@ -118,6 +118,54 @@ export class ValidadorTelPro {
     return { fake: false, motivo: null };
   }
 
+  static deduzirOperadora(ddd, corpo, isCelular) {
+    if (!isCelular) {
+      const d1 = corpo.charAt(0);
+      let nome = 'Concessionária Local STFC';
+      if (d1 === '3') {
+        nome = (ddd >= '11' && ddd <= '19') ? 'Vivo (Telefônica Fixo)' : 'Oi / V.tal (Fixo)';
+      } else if (d1 === '2') {
+        nome = 'Claro (Embratel Fixo)';
+      } else if (d1 === '4' || d1 === '5') {
+        nome = 'Vivo (GVT) / Operadoras Locais STFC';
+      }
+      return {
+        nome,
+        tipo: 'STFC (Serviço Telefônico Fixo Comutado)',
+        origem: 'Plano Básico de Numeração ANATEL'
+      };
+    }
+
+    const p3 = corpo.slice(0, 3);
+    let nome = 'Operadora Móvel Nacional (SMP)';
+    if ((ddd === '34' || ddd === '37') && (p3 === '999' || p3 === '996')) {
+      nome = 'Algar Telecom';
+    } else if (ddd === '43' && p3 === '991') {
+      nome = 'Sercomtel Celular';
+    } else if (['971', '972', '973', '974', '975', '995', '996', '997', '998', '999'].includes(p3)) {
+      nome = 'Vivo (Telefônica Brasil)';
+    } else if (['968', '976', '991', '992', '993', '994', '964'].includes(p3)) {
+      nome = 'Claro (América Móvil)';
+    } else if (['981', '982', '983', '984', '979', '980'].includes(p3)) {
+      nome = 'TIM Brasil';
+    } else if (['985', '986', '987', '988', '989'].includes(p3)) {
+      if (['11','12','13','14','15','16','17','18','19','51','53','54','55'].includes(ddd)) {
+        nome = 'Claro (Ex-Oi Móvel por Partilha ANATEL)';
+      } else if (['21','22','24','27','28'].includes(ddd)) {
+        nome = 'Vivo (Ex-Oi Móvel por Partilha ANATEL)';
+      } else {
+        nome = 'TIM Brasil (Ex-Oi Móvel por Partilha ANATEL)';
+      }
+    }
+
+    return {
+      nome,
+      tipo: 'SMP (Serviço Móvel Pessoal)',
+      origem: 'Plano Básico de Numeração ANATEL',
+      portabilidadeAviso: 'Baseado na faixa oficial de outorga ANATEL. Caso tenha ocorrido portabilidade numérica posterior, a linha pode estar operando em outra operadora.'
+    };
+  }
+
   static validarBrasil(limpo, comDdi = false) {
     let nat = limpo;
     if (comDdi && nat.startsWith('55')) {
@@ -186,6 +234,7 @@ export class ValidadorTelPro {
 
     const e164 = `+55${nat}`;
     const e164Limpo = `55${nat}`;
+    const operadora = this.deduzirOperadora(ddd, numeroCorpo, isCelular);
 
     return {
       valido: true,
@@ -193,6 +242,14 @@ export class ValidadorTelPro {
       ehCelular: isCelular,
       ehFixo: !isCelular,
       possuiWhatsapp: isCelular,
+      operadora: operadora.nome,
+      detalhesOperadora: operadora,
+      comunicacao: {
+        aceitaSms: isCelular,
+        podeTerWhatsapp: true,
+        tipoWhatsappProvavel: isCelular ? 'pessoal_ou_business' : 'apenas_whatsapp_business',
+        whatsappLink: isCelular ? `https://wa.me/${e164Limpo}` : null
+      },
       pais: { codigo: 'BR', nome: 'Brasil', ddi: '55', flag: '🇧🇷' },
       ddd,
       uf: dddInfo.uf,
