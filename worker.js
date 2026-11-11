@@ -29,8 +29,7 @@ export default {
         version: '1.0.0',
         cluster: 'Cloudflare Edge Anycast (diffstoregja2.workers.dev)',
         status: 'online',
-        github: 'https://github.com/clepta2/validadortel-pro',
-        docs: 'https://ponte.ozpro.com.br'
+        github: 'https://github.com/clepta2/validadortel-pro'
       }, null, 2), {
         status: 200,
         headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
