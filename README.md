@@ -1,11 +1,25 @@
 # 📞 ValidadorTel Pro
 
-> **SDK & API Oficial de Validação Telefônica, Detecção ANATEL e ITU E.164 Internacional.**  
-> Valida celulares (11 dígitos com nono dígito 9) e fixos (10 dígitos), mapeia 67 DDDs e Estados brasileiros, identifica números falsos/repetidos, formata padrão internacional E.164 e gera links diretos para WhatsApp na borda Anycast (<5ms).
+> **Documentação Oficial da API & SDK de Integração Telefônica (ANATEL & ITU E.164).**  
+> 🔒 **Atenção:** Este repositório destina-se exclusivamente à visualização de documentação técnica e integração do cliente SDK. O serviço de API em nuvem é operado através do nosso **Site de APIs (em breve)**. O acesso aos endpoints na borda requer obrigatoriamente uma **Chave de API (`x-api-key`)** ativa.
 
-[![npm version](https://img.shields.io/npm/v/validadortel-pro.svg)](https://www.npmjs.com/package/validadortel-pro)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Edge Ready](https://img.shields.io/badge/Edge-Cloudflare%20Workers-orange.svg)](https://workers.cloudflare.com/)
+[![Status](https://img.shields.io/badge/Status-Cloudflare%20Edge%20API-success.svg)](#)
+[![Padrão](https://img.shields.io/badge/Padrão-ANATEL%20%26%20ITU%20E.164-blue.svg)](#)
+[![Autenticação](https://img.shields.io/badge/Autenticação-x--api--key%20Obrigatória-orange.svg)](#)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietária%20%2F%20Portal%20de%20APIs-red.svg)](LICENSE)
+
+---
+
+## 🔒 Acesso à API e Chaves
+
+Para consumir esta API nos seus sistemas, cadastre-se no nosso **Site de APIs** para obter sua chave de acesso (`x-api-key`).
+
+Todas as requisições aos endpoints em nuvem devem incluir a chave no cabeçalho:
+```http
+GET /api/validar-telefone?telefone=11996541234 HTTP/1.1
+Host: validadortel-pro-api.diffstoregja2.workers.dev
+x-api-key: SUA_CHAVE_DO_PORTAL
+```
 
 ---
 
@@ -17,7 +31,7 @@ npm install validadortel-pro
 
 ---
 
-## ⚡ Uso Rápido (SDK em JavaScript / TypeScript)
+## ⚡ Uso com o SDK Oficial
 
 ```javascript
 import { ValidadorTelPro } from 'validadortel-pro';
@@ -53,14 +67,18 @@ console.log(resInternacional.whatsappLink);    // "https://wa.me/351912345678"
 
 ---
 
-## 🌐 Endpoint Público Anycast Edge
+## 🌐 Endpoint Anycast Edge (Requer x-api-key)
 
 * **Endpoint Cloudflare:** `GET https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-telefone?telefone=...`
 * **Cluster:** Cloudflare Anycast (`diffstoregja2.workers.dev`)
+* **Autenticação:** Header `x-api-key` ou `Authorization: Bearer <key>`
 * **Latência:** `<5ms`
-* **Formatos Aceitos:** `GET` ou `POST` (JSON)
 
 ### Exemplo via cURL:
+```bash
+curl -X GET "https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-telefone?telefone=11987654321" \
+  -H "x-api-key: SUA_CHAVE_DO_PORTAL"
+```
 ```bash
 curl -X GET "https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar-telefone?telefone=11987654321"
 ```
