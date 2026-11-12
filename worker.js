@@ -4,7 +4,7 @@
  * Validação de telefonia brasileira e internacional: 67 DDDs ANATEL, 9º dígito,
  * ITU E.164, links de WhatsApp e bloqueio de números falsos.
  *
- * Rate Limiter Ativo: 1 req/s para Free (60 req/min = 86.400 req/dia máx) | 300 req/min para Pro
+ * Rate limiter local por isolate; não define cota diária global. Lotes reduzem chamadas.
  *
  * @license MIT
  * @see https://github.com/clepta2/validadortel-pro
@@ -61,6 +61,13 @@ export default {
       });
     }
 
+    let bodyJson = null;
+    if (request.method === 'POST') {
+      try {
+        bodyJson = await request.json();
+      } catch (_) {}
+    }
+
     // 3. Autenticação & Rate Limiting
     const apiKey = request.headers.get('x-api-key') ||
                    request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '') ||
@@ -74,7 +81,7 @@ export default {
     if (!rl.ok && pathname !== '/health' && pathname !== '/status' && pathname !== '') {
       return new Response(JSON.stringify({
         ok: false,
-        error: 'Limite de requisições excedido. Máximo permitido: 1 req/segundo (60 req/min = 86.400 req/dia máx). Para vazão ilimitada, utilize sua chave x-api-key Pro.',
+        error: 'Limite temporário de requisições excedido. Aguarde o período indicado em Retry-After.',
         retryAfterSeconds: Math.ceil((rl.resetAt - Date.now()) / 1000)
       }, null, 2), {
         status: 429,
@@ -119,7 +126,8 @@ export default {
           service: 'ValidadorTel Pro API',
           cluster: 'Cloudflare Edge Anycast',
           rotas: {
-            validar: 'GET /api/validar-telefone?telefone=... ou POST /api/validar-telefone'
+            validar: 'GET /api/validar-telefone?telefone=... ou POST /api/validar-telefone',
+            lote: 'POST /api/telefone/lote (até 50 telefones Pro ou 5 gratuitos)'
           },
           github: 'https://github.com/clepta2/validadortel-pro'
         }, null, 2), {
@@ -133,15 +141,62 @@ export default {
       });
     }
 
+    // Validação em Lote de Telefones (POST /api/telefone/lote ou /api/validar-telefone/lote)
+    if (pathname === '/api/telefone/lote' || pathname === '/api/validar-telefone/lote') {
+      if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ ok: false, error: 'Use POST com um array "telefones".' }), {
+          status: 405,
+          headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS_HEADERS }
+        });
+      }
+
+      const lista = bodyJson && Array.isArray(bodyJson.telefones) ? bodyJson.telefones : null;
+      if (!lista || lista.length === 0) {
+        return new Response(JSON.stringify({ ok: false, error: 'Envie um array não vazio "telefones" no corpo JSON.' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS_HEADERS }
+        });
+      }
+
+      const maxItems = isPro ? 50 : 5;
+      if (lista.length > maxItems) {
+        return new Response(JSON.stringify({
+          ok: false,
+          error: `O lote aceita até ${maxItems} telefones por requisição neste plano.`,
+          maxItems
+        }), {
+          status: 413,
+          headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS_HEADERS }
+        });
+      }
+
+      const resultados = lista.map((item) => {
+        const res = ValidadorTelPro.validar(String(item || ''));
+        return {
+          telefoneInformado: String(item),
+          ok: res.valido,
+          ...res
+        };
+      });
+
+      return new Response(JSON.stringify({
+        ok: true,
+        totalSolicitado: lista.length,
+        totalValidos: resultados.filter((item) => item.valido).length,
+        totalInvalidos: resultados.filter((item) => !item.valido).length,
+        resultados
+      }, null, 2), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS_HEADERS }
+      });
+    }
+
     // 6. Rota Principal de Validação de Telefone
     if (pathname === '/api/validar-telefone' || pathname === '/api/telefone/validar' || pathname === '/api/validar' || pathname === '/api/telefone') {
       let telInput = url.searchParams.get('telefone') || url.searchParams.get('numero') || url.searchParams.get('valor') || '';
 
-      if (!telInput && request.method === 'POST') {
-        try {
-          const body = await request.json();
-          telInput = body.telefone || body.numero || body.valor || '';
-        } catch (_) {}
+      if (!telInput && bodyJson) {
+        telInput = bodyJson.telefone || bodyJson.numero || bodyJson.valor || '';
       }
 
       if (!telInput) {

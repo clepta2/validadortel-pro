@@ -82,7 +82,22 @@ curl -X GET "https://ponte.ozpro.com.br/api/validar-telefone?telefone=1198765432
 ```
 ```bash
 curl -X GET "https://ponte.ozpro.com.br/api/validar-telefone?telefone=11987654321"
+
+# Validação em lote (Batch) — até 50 telefones Pro ou 5 gratuitos
+curl -X POST "https://ponte.ozpro.com.br/api/telefone/lote" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: ponte_live_SUA_CHAVE_DO_PORTAL" \
+  -d '{"telefones": ["(11) 98765-4321", "(21) 2540-1234", "+351 912 345 678"]}'
 ```
+
+---
+
+## 🛡️ Rate Limiting & Proteção de Cotas
+
+- **Plano Gratuito:** até 60 req/min por isolate de borda.
+- **Plano Pro / Enterprise (`x-api-key`):** até 300 req/min.
+- Para higienização de listas de contatos (CRM/WhatsApp/SMS), utilize a rota de lote (`/api/telefone/lote`) para processar até 50 números por chamada.
+- O contador em memória do Worker é local por isolate e não representa uma cota diária global centralizada.
 
 ### Exemplo de Resposta JSON:
 ```json

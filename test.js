@@ -4,8 +4,9 @@
  */
 
 import { ValidadorTelPro } from './validadortel-pro.js';
+import worker from './worker.js';
 
-function runTests() {
+async function runTests() {
   console.log('=== TESTES DO VALIDADORTEL PRO ===\n');
 
   const cases = [
@@ -47,6 +48,32 @@ function runTests() {
   }
 
   console.log(`Resultado: ${passed}/${cases.length} testes passaram com 100% de precisão!`);
+
+  // Testes de Lote do Worker
+  console.log('\n--- Teste de Validação em Lote (Worker) ---');
+  const resLote = await worker.fetch(new Request('https://api.test/api/telefone/lote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefones: ['(11) 98765-4321', '11111111111', '+351 912 345 678'] })
+  }), {});
+  const bodyLote = await resLote.json();
+  console.assert(resLote.status === 200, 'Status do lote deve ser 200');
+  console.assert(bodyLote.totalSolicitado === 3, 'Deve processar 3 telefones');
+  console.assert(bodyLote.totalValidos === 2, '2 telefones válidos');
+  console.assert(bodyLote.totalInvalidos === 1, '1 telefone inválido');
+  console.log('✅ Rota de lote de telefones processou corretamente a rodada');
+
+  const resExcesso = await worker.fetch(new Request('https://api.test/api/telefone/lote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefones: Array(6).fill('11987654321') })
+  }), {});
+  console.assert(resExcesso.status === 413, 'Excesso gratuito deve retornar 413');
+  console.log('✅ Limite de tamanho de lote gratuito respeitado (413)');
+
+  const resMetodo = await worker.fetch(new Request('https://api.test/api/telefone/lote'), {});
+  console.assert(resMetodo.status === 405, 'GET em /api/telefone/lote deve retornar 405');
+  console.log('✅ Método incorreto rejeitado');
 }
 
 runTests();
