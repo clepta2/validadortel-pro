@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValidadorTel Pro Studio • Validação de Telefonia &amp; 67 DDDs ANATEL • Ponte API</title>
+  <meta name="description" content="Validador inteligente de números de telefone e celulares brasileiros: 67 DDDs ANATEL, 9º dígito obrigatório, padrão internacional E.164 e geração de links de WhatsApp.">
+  <link rel="stylesheet" href="ponte-suite.css">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('ponte.theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+  <script defer src="ponte-icons.js"></script>
+</head>
+<body>
+
+  <!-- Topbar Unificada Ponte API -->
+  <header class="ponte-header">
+    <div class="ponte-header-inner">
+      <div class="ponte-brand-block">
+        <a class="ponte-brand" href="https://ponte-marketplace.maputo2.workers.dev/#catalogo">
+          <svg class="ponte-brand-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="10" fill="#a3e635"/>
+            <path d="M12 28V12L28 20L12 28Z" fill="#0c1715"/>
+          </svg>
+          <div class="ponte-brand-copy">
+            <strong>ponte</strong>
+            <small>API MARKET · OZPRO</small>
+          </div>
+        </a>
+        <div class="ponte-breadcrumb">
+          <a href="https://ponte-marketplace.maputo2.workers.dev/#catalogo">Workspace</a>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <a href="https://ponte-marketplace.maputo2.workers.dev/#catalogo">Validação &amp; Telecom</a>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <strong>ValidadorTel Pro Studio</strong>
+        </div>
+      </div>
+      <div class="ponte-topbar-actions">
+        <span class="ponte-status-edge"><span class="ponte-status-dot"></span> Cloudflare Anycast &lt;1ms</span>
+        <a href="https://ponte-marketplace.maputo2.workers.dev/#catalogo" class="ponte-btn-marketplace">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Marketplace
+        </a>
+        <button class="ponte-theme-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="ponte-container">
+    <div class="ponte-hero">
+      <div class="ponte-badges-bar">
+        <span class="ponte-badge mint">● 67 DDDs Oficiais ANATEL</span>
+        <span class="ponte-badge blue">📱 9º Dígito Móvel Obrigatório</span>
+        <span class="ponte-badge amber">💬 Links Diretos de WhatsApp</span>
+        <span class="ponte-badge purple">⚡ ITU E.164 Global</span>
+      </div>
+      <h1>ValidadorTel Pro Studio</h1>
+      <p>Higienização e validação de números telefônicos em tempo real: formate automaticamente, verifique se o DDD existe na ANATEL, certifique-se da presença do 9º dígito em celulares e gere links diretos de WhatsApp (wa.me).</p>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid-layout" style="display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start;">
+      
+      <!-- Painel de Testes -->
+      <div class="ponte-card">
+        <div class="ponte-card-title">
+          <h3>Validador de Telefone &amp; Celular</h3>
+          <span style="font-size:12px;color:var(--mint);font-family:var(--font-mono);">ANATEL / ITU E.164</span>
+        </div>
+        <p class="ponte-card-desc">Digite qualquer número com ou sem máscara para validar instantaneamente.</p>
+
+        <div class="ponte-form-group">
+          <label>Número do Telefone / Celular</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="telInput" class="ponte-input" placeholder="ex: (11) 98765-4321 ou 2125551234" value="(11) 98765-4321" style="flex:1;font-size:15px;font-family:var(--font-mono);" />
+            <button class="ponte-btn ponte-btn-primary" onclick="validarTelefone()">
+              <span>Validar</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="ponte-btn ponte-btn-secondary ponte-btn-sm" onclick="setExemplo('11998877665')">SP Celular (11)</button>
+          <button class="ponte-btn ponte-btn-secondary ponte-btn-sm" onclick="setExemplo('2125551234')">RJ Fixo (21)</button>
+          <button class="ponte-btn ponte-btn-secondary ponte-btn-sm" onclick="setExemplo('08007290722')">0800 Banco do Brasil</button>
+          <button class="ponte-btn ponte-btn-secondary ponte-btn-sm" onclick="setExemplo('1187654321')">SP Celular Sem o 9</button>
+        </div>
+
+        <!-- Indicadores de Status -->
+        <div id="resultadoCards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+          <div style="background:var(--paper-elevated);padding:12px;border-radius:8px;border:1px solid var(--line);">
+            <div style="font-size:11px;color:var(--muted);">Status ANATEL</div>
+            <div id="valStatus" style="font-size:13px;font-weight:700;color:var(--ink);margin-top:4px;">-</div>
+          </div>
+          <div style="background:var(--paper-elevated);padding:12px;border-radius:8px;border:1px solid var(--line);">
+            <div style="font-size:11px;color:var(--muted);">Tipo de Linha</div>
+            <div id="valTipo" style="font-size:13px;font-weight:700;color:var(--ink);margin-top:4px;">-</div>
+          </div>
+          <div style="background:var(--paper-elevated);padding:12px;border-radius:8px;border:1px solid var(--line);">
+            <div style="font-size:11px;color:var(--muted);">DDD &amp; Estado</div>
+            <div id="valDdd" style="font-size:13px;font-weight:700;color:var(--ink);margin-top:4px;">-</div>
+          </div>
+          <div style="background:var(--paper-elevated);padding:12px;border-radius:8px;border:1px solid var(--line);">
+            <div style="font-size:11px;color:var(--muted);">Formato Internacional (E.164)</div>
+            <div id="valE164" style="font-size:13px;font-weight:700;color:var(--ink);margin-top:4px;">-</div>
+          </div>
+        </div>
+
+        <div id="whatsappSection" style="margin-top:16px;display:none;">
+          <a id="btnWhatsApp" href="#" target="_blank" class="ponte-btn ponte-btn-primary" style="background:#22c55e;color:#fff;display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+            💬 Abrir Conversa no WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- Resposta JSON & Telemetria -->
+      <div class="ponte-card">
+        <div class="ponte-card-title">
+          <h3>Payload JSON Retornado</h3>
+          <button class="ponte-btn ponte-btn-secondary ponte-btn-sm" onclick="copiarJson()">
+            📋 Copiar JSON
+          </button>
+        </div>
+        <pre id="jsonOutput" style="background:#030712;padding:14px;border-radius:8px;color:#a5f3fc;font-family:var(--font-mono);font-size:12px;max-height:360px;overflow-y:auto;white-space:pre-wrap;line-height:1.5;">Clique em "Validar" para testar.</pre>
+      </div>
+
+    </div>
+
+    <!-- Documentação de Endpoints -->
+    <div class="ponte-card" style="margin-top:20px;">
+      <div class="ponte-card-title">
+        <h3>Endpoints Oficiais Anycast</h3>
+      </div>
+      <div style="display:grid;gap:8px;font-family:var(--font-mono);font-size:12px;">
+        <div style="background:var(--canvas);padding:10px;border-radius:6px;border:1px solid var(--line);">
+          <strong style="color:#10b981;">GET</strong> <code>/api/validar?numero={numero}</code> — Validação completa de telefone, celular, DDD e E.164
+        </div>
+        <div style="background:var(--canvas);padding:10px;border-radius:6px;border:1px solid var(--line);">
+          <strong style="color:#3b82f6;">POST</strong> <code>/api/telefone/lote</code> — Higienização e padronização em lote (até 50 números por requisição)
+        </div>
+        <div style="background:var(--canvas);padding:10px;border-radius:6px;border:1px solid var(--line);">
+          <strong style="color:#10b981;">GET</strong> <code>/api/ddds</code> — Catálogo JSON oficial dos 67 DDDs brasileiros com seus respectivos estados
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Rodapé Unificado -->
+  <footer class="ponte-footer">
+    <div style="max-width:1240px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <strong>ValidadorTel Pro Studio</strong> &bull; Cloudflare Edge Anycast
+      </div>
+      <div>
+        Integrado ao <a href="https://ponte-marketplace.maputo2.workers.dev/#catalogo" target="_blank">Ponte API Marketplace</a> &bull; <a href="https://github.com/clepta2/validadortel-pro" target="_blank">Repositório GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme');
+        const next = cur === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('ponte.theme', next);
+        themeBtn.textContent = next === 'light' ? '☀️' : '🌙';
+      });
+      themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? '☀️' : '🌙';
+    }
+
+    function setExemplo(num) {
+      document.getElementById('telInput').value = num;
+      validarTelefone();
+    }
+
+    async function validarTelefone() {
+      const input = document.getElementById('telInput').value.trim();
+      if (!input) return;
+
+      const out = document.getElementById('jsonOutput');
+      out.textContent = 'Validando número na Borda Anycast...';
+
+      let data = null;
+      try {
+        const res = await fetch(`https://validadortel-pro-api.diffstoregja2.workers.dev/api/validar?numero=${encodeURIComponent(input)}`, {
+          signal: AbortSignal.timeout(5000)
+        });
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (_) {}
+
+      // Fallback local determinístico se offline
+      if (!data) {
+        const apenasDigitos = input.replace(/\D/g, '');
+        let ddd = '';
+        let numeroLimpo = apenasDigitos;
+        if (apenasDigitos.startsWith('55') && apenasDigitos.length >= 12) {
+          numeroLimpo = apenasDigitos.slice(2);
+        }
+
+        const is0800 = numeroLimpo.startsWith('0800') || numeroLimpo.startsWith('0300');
+        let tipo = 'Invalido';
+        let valido = false;
+        let formatado = input;
+
+        if (is0800 && numeroLimpo.length === 11) {
+          tipo = 'Gratuito 0800';
+          valido = true;
+          formatado = `${numeroLimpo.slice(0, 4)} ${numeroLimpo.slice(4, 7)} ${numeroLimpo.slice(7)}`;
+        } else if (numeroLimpo.length === 11) {
+          ddd = numeroLimpo.slice(0, 2);
+          const digito9 = numeroLimpo[2];
+          tipo = digito9 === '9' ? 'Celular' : 'Móvel';
+          valido = digito9 === '9';
+          formatado = `(${ddd}) ${numeroLimpo.slice(2, 7)}-${numeroLimpo.slice(7)}`;
+        } else if (numeroLimpo.length === 10) {
+          ddd = numeroLimpo.slice(0, 2);
+          tipo = 'Telefone Fixo';
+          valido = ['2','3','4','5'].includes(numeroLimpo[2]);
+          formatado = `(${ddd}) ${numeroLimpo.slice(2, 6)}-${numeroLimpo.slice(6)}`;
+        }
+
+        data = {
+          ok: true,
+          valido,
+          tipo,
+          numeroOriginal: input,
+          numeroFormatado: formatado,
+          ddd: ddd || 'Nacional',
+          e164: valido && !is0800 ? `+55${numeroLimpo}` : null,
+          whatsappUrl: valido && tipo === 'Celular' ? `https://wa.me/55${numeroLimpo}` : null,
+          cluster: 'Offline Local / Fallback Anycast'
+        };
+      }
+
+      out.textContent = JSON.stringify(data, null, 2);
+
+      // Atualiza cards
+      document.getElementById('valStatus').innerHTML = data.valido ? '<span style="color:#10b981;">✓ Número Válido</span>' : '<span style="color:#ef4444;">✕ Número Inválido</span>';
+      document.getElementById('valTipo').textContent = data.tipo || 'Desconhecido';
+      document.getElementById('valDdd').textContent = data.ddd ? `DDD ${data.ddd}` : 'Nacional';
+      document.getElementById('valE164').textContent = data.e164 || 'Não aplicável';
+
+      // Se for celular com WhatsApp
+      const waSec = document.getElementById('whatsappSection');
+      const waBtn = document.getElementById('btnWhatsApp');
+      if (data.whatsappUrl) {
+        waSec.style.display = 'block';
+        waBtn.href = data.whatsappUrl;
+      } else {
+        waSec.style.display = 'none';
+      }
+    }
+
+    function copiarJson() {
+      const text = document.getElementById('jsonOutput').textContent;
+      navigator.clipboard.writeText(text);
+      alert('JSON copiado com sucesso!');
+    }
+
+    // Dispara validação inicial
+    validarTelefone();
+  </script>
+</body>
+</html>
